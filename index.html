@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Bank Account Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 36px;
+            color: #333;
+            margin: 20px 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .btn-container {
+            text-align: center;
+        }
+
+        .btn {
+            background-color: #ff5733;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            margin: 0 10px;
+        }
+
+        .btn-green {
+            background-color: #33ff57;
+        }
+
+        .btn-blue {
+            background-color: #3377ff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .btn-delete {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Bank Account Management</h1>
+    <div class="container">
+        <form id="bankForm">
+            <div class="form-group">
+                <label for="accountNumber">Account Number:</label>
+                <input type="number" id="accountNumber" required>
+            </div>
+
+            <div class="form-group">
+                <label for="userName">User Name:</label>
+                <input type="text" id="userName" required>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <input type="text" id="address" required>
+            </div>
+
+            <div class="btn-container">
+                <button type="button" onclick="addAccount()" class="btn">Add Account</button>
+                <button type="button" onclick="withdraw()" class="btn">Withdraw</button>
+                <button type="button" onclick="deposit()" class="btn btn-green">Deposit</button>
+                <button type="button" onclick="checkBalance()" class="btn btn-blue">Check Balance</button>
+            </div>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Account Number</th>
+                    <th>User Name</th>
+                    <th>Address</th>
+                    <th>Balance</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="accountTableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        function addAccount() {
+            const accountNumber = document.getElementById("accountNumber").value;
+            const userName = document.getElementById("userName").value;
+            const address = document.getElementById("address").value;
+
+            if (isValidInput(accountNumber, userName, address)) {
+                addTableRow(accountNumber, userName, address);
+                document.getElementById("bankForm").reset();
+            }
+        }
+
+        function isValidInput(accountNumber, userName, address) {
+            if (!accountNumber || isNaN(accountNumber)) {
+                alert("Please enter a valid account number.");
+                return false;
+            }
+
+            if (!userName) {
+                alert("Please enter a user name.");
+                return false;
+            }
+
+            if (!address) {
+                alert("Please enter an address.");
+                return false;
+            }
+
+            return true;
+        }
+
+        function addTableRow(accountNumber, userName, address) {
+            const newRow = document.createElement("tr");
+
+            const accountNumberCell = document.createElement("td");
+            accountNumberCell.textContent = accountNumber;
+
+            const userNameCell = document.createElement("td");
+            userNameCell.textContent = userName;
+
+            const addressCell = document.createElement("td");
+            addressCell.textContent = address;
+
+            const balanceCell = document.createElement("td");
+            balanceCell.textContent = "0"; // Initial balance
+
+            const deleteCell = document.createElement("td");
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.style.backgroundColor = "red";
+            deleteButton.style.color = "white";
+            deleteButton.style.border = "none";
+            deleteButton.style.padding = "5px 10px";
+            deleteButton.style.cursor = "pointer";
+            deleteButton.addEventListener("click", function () {
+                deleteTableRow(newRow);
+            });
+
+            deleteCell.appendChild(deleteButton);
+
+            newRow.appendChild(accountNumberCell);
+            newRow.appendChild(userNameCell);
+            newRow.appendChild(addressCell);
+            newRow.appendChild(balanceCell);
+            newRow.appendChild(deleteCell);
+
+            document.getElementById("accountTableBody").appendChild(newRow);
+        }
+
+        function deleteTableRow(row) {
+            row.remove();
+        }
+
+        function withdraw() {
+            const accountNumber = prompt("Enter the account number for withdrawal:");
+            const amount = parseFloat(prompt("Enter the withdrawal amount:"));
+            const row = findRowByAccountNumber(accountNumber);
+
+            if (row && amount >= 0) {
+                const balanceCell = row.querySelector("td:nth-child(4)");
+                const currentBalance = parseFloat(balanceCell.textContent);
+                if (amount <= currentBalance) {
+                    const newBalance = currentBalance - amount;
+                    balanceCell.textContent = newBalance.toFixed(2);
+                } else {
+                    alert("Insufficient funds for withdrawal.");
+                }
+            } else {
+                alert("Account not found or invalid amount.");
+            }
+        }
+
+        function deposit() {
+            const accountNumber = prompt("Enter the account number for deposit:");
+            const amount = parseFloat(prompt("Enter the deposit amount:"));
+            const row = findRowByAccountNumber(accountNumber);
+
+            if (row && amount >= 0) {
+                const balanceCell = row.querySelector("td:nth-child(4)");
+                const currentBalance = parseFloat(balanceCell.textContent);
+                const newBalance = currentBalance + amount;
+                balanceCell.textContent = newBalance.toFixed(2);
+            } else {
+                alert("Account not found or invalid amount.");
+            }
+        }
+
+        function checkBalance() {
+            const accountNumber = prompt("Enter the account number to check balance:");
+            const row = findRowByAccountNumber(accountNumber);
+
+            if (row) {
+                const balanceCell = row.querySelector("td:nth-child(4)");
+                const currentBalance = parseFloat(balanceCell.textContent);
+                alert(`Account balance: ${currentBalance.toFixed(2)}`);
+            } else {
+                alert("Account not found.");
+            }
+        }
+
+        function findRowByAccountNumber(accountNumber) {
+            const rows = document.querySelectorAll("tbody#accountTableBody tr");
+            for (const row of rows) {
+                const accountNumberCell = row.querySelector("td:nth-child(1)");
+                if (accountNumberCell.textContent === accountNumber) {
+                    return row;
+                }
+            }
+            return null;
+        }
+    </script>
+</body>
+
+</html>
